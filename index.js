@@ -1,19 +1,36 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const { readFile } = require('fs/promises');
-const { createCanvas } = require('canvas');
+const cors = require('cors');  // cors paketini içe aktar
 
 const app = express();
 const server = createServer(app);
-const io = new Server(server);
 
-app.use(express.static('public')); // Serve all static files from the 'public' directory
+// CORS ayarlarını ekleyin
+app.use(cors({
+    origin: "http://localhost:8080",  // Python sunucusunun adresini belirtin
+    methods: ['GET', 'POST'],
+    allowedHeaders: ['Content-Type'],
+    credentials: true
+}));
+
+const io = new Server(server, {
+    cors: {
+        origin: "http://localhost:8080",  // Python sunucusunun adresini belirtin
+        methods: ['GET', 'POST'],
+        allowedHeaders: ['Content-Type'],
+        credentials: true
+    }
+});
+
+app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-    socket.on('pointSelected', async (data) => {
+    console.log('A client connected');  // Debugging message
+    socket.on('pointSelected', (data) => {
         const { x, y } = data;
-        console.log(x, y);
+        console.log('Received pointSelected:', x, y);
+        socket.emit('pathfindingRequest', { x, y });  // Ensure event name matches Python server
     });
 });
 
