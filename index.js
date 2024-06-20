@@ -1,14 +1,13 @@
 const express = require('express');
 const { createServer } = require('http');
 const { Server } = require('socket.io');
-const cors = require('cors');  // cors paketini içe aktar
+const cors = require('cors');
 
 const app = express();
 const server = createServer(app);
 
-// CORS ayarlarını ekleyin
 app.use(cors({
-    origin: "http://localhost:8080",  // Python sunucusunun adresini belirtin
+    origin: "http://localhost:8080",
     methods: ['GET', 'POST'],
     allowedHeaders: ['Content-Type'],
     credentials: true
@@ -16,7 +15,7 @@ app.use(cors({
 
 const io = new Server(server, {
     cors: {
-        origin: "http://localhost:8080",  // Python sunucusunun adresini belirtin
+        origin: "http://localhost:8080",
         methods: ['GET', 'POST'],
         allowedHeaders: ['Content-Type'],
         credentials: true
@@ -26,11 +25,10 @@ const io = new Server(server, {
 app.use(express.static('public'));
 
 io.on('connection', (socket) => {
-    console.log('A client connected');  // Debugging message
+    console.log('A client connected');
     socket.on('pointSelected', (data) => {
         const { x, y } = data;
         console.log('Received pointSelected:', x, y);
-        socket.emit('pathfindingRequest', { x, y });  // Ensure event name matches Python server
     });
 });
 
